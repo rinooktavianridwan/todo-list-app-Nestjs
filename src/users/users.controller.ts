@@ -52,12 +52,9 @@ export class UsersController {
   }
 
   @Get('profile')
-  async getProfile(
-    @Request() req: AuthenticatedRequest,
-  ): Promise<ApiResponse<UserResponse>> {
+  getProfile(@Request() req: AuthenticatedRequest): ApiResponse<UserResponse> {
     const user = req.user;
 
-    // Remove password from response
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password, ...result } = user;
 

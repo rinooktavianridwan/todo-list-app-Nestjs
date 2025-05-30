@@ -36,7 +36,6 @@ export interface TodoResponse {
 interface AuthenticatedRequest extends Request {
   user: User;
 }
-
 @Controller('todos')
 @UseGuards(JwtAuthGuard)
 export class TodosController {
@@ -46,7 +45,11 @@ export class TodosController {
   async findAll(
     @Request() req: AuthenticatedRequest,
   ): Promise<ApiResponse<TodoResponse[]>> {
+    if (!req.user || !req.user.id) {
+      throw new NotFoundException('User not found in token');
+    }
     const userId = req.user.id;
+    console.log('User ID:', userId); // Debugging line to check user ID
     const todos = await this.todosService.findAll(userId);
 
     const todoResponses = todos.map((todo) => ({
