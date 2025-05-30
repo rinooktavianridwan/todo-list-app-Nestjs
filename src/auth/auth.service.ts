@@ -83,7 +83,7 @@ export class AuthService {
       access_token,
     };
 
-    return successResponse('Login successful', loginData);
+    return successResponse('Login successful', loginData, 200);
   }
 
   async validateUser(userId: number) {
