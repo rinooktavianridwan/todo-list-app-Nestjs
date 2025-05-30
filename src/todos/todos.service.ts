@@ -23,7 +23,11 @@ export class TodosService {
   }
 
   async findOne(id: number, userId?: number): Promise<Todo | null> {
-    const where: any = { id };
+    const where: {
+      id: number;
+      user?: { id: number };
+    } = { id };
+
     if (userId) {
       where.user = { id: userId };
     }

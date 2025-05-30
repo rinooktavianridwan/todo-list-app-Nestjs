@@ -9,10 +9,14 @@ import {
   ValidationPipe,
   UsePipes,
   ConflictException,
+  UseGuards,
+  Request,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ApiResponse, successResponse } from '../common/api-response';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { User } from './user.entity';
 
 export interface UserResponse {
   id: number;
@@ -22,7 +26,12 @@ export interface UserResponse {
   updatedAt: Date;
 }
 
+interface AuthenticatedRequest extends Request {
+  user: User;
+}
+
 @Controller('users')
+@UseGuards(JwtAuthGuard)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
@@ -39,6 +48,22 @@ export class UsersController {
     return successResponse(
       'Users retrieved successfully',
       usersWithoutPassword,
+    );
+  }
+
+  @Get('profile')
+  async getProfile(
+    @Request() req: AuthenticatedRequest,
+  ): Promise<ApiResponse<UserResponse>> {
+    const user = req.user;
+
+    // Remove password from response
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password, ...result } = user;
+
+    return successResponse(
+      'Profile retrieved successfully',
+      result as UserResponse,
     );
   }
 

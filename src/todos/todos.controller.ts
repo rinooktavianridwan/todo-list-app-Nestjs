@@ -9,11 +9,15 @@ import {
   ValidationPipe,
   UsePipes,
   NotFoundException,
+  UseGuards,
+  Request,
 } from '@nestjs/common';
 import { TodosService } from './todos.service';
 import { CreateTodoDto } from './dto/create-todo.dto';
 import { UpdateTodoDto } from './dto/update-todo.dto';
 import { ApiResponse, successResponse } from '../common/api-response';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { User } from '../users/user.entity';
 
 export interface TodoResponse {
   id: number;
@@ -29,15 +33,21 @@ export interface TodoResponse {
   updatedAt: Date;
 }
 
+interface AuthenticatedRequest extends Request {
+  user: User;
+}
+
 @Controller('todos')
+@UseGuards(JwtAuthGuard)
 export class TodosController {
   constructor(private readonly todosService: TodosService) {}
 
   @Get()
-  async findAll(): Promise<ApiResponse<TodoResponse[]>> {
-    // TODO: Get userId from JWT token when authentication is implemented
-    // For now, return all todos
-    const todos = await this.todosService.findAll();
+  async findAll(
+    @Request() req: AuthenticatedRequest,
+  ): Promise<ApiResponse<TodoResponse[]>> {
+    const userId = req.user.id;
+    const todos = await this.todosService.findAll(userId);
 
     const todoResponses = todos.map((todo) => ({
       id: todo.id,
@@ -57,9 +67,12 @@ export class TodosController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string): Promise<ApiResponse<TodoResponse>> {
-    // TODO: Get userId from JWT token when authentication is implemented
-    const todo = await this.todosService.findOne(+id);
+  async findOne(
+    @Param('id') id: string,
+    @Request() req: AuthenticatedRequest,
+  ): Promise<ApiResponse<TodoResponse>> {
+    const userId = req.user.id;
+    const todo = await this.todosService.findOne(+id, userId);
     if (!todo) {
       throw new NotFoundException('Todo not found');
     }
@@ -85,10 +98,9 @@ export class TodosController {
   @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
   async create(
     @Body() createTodoDto: CreateTodoDto,
+    @Request() req: AuthenticatedRequest,
   ): Promise<ApiResponse<TodoResponse>> {
-    // TODO: Get userId from JWT token when authentication is implemented
-    // For now, use dummy userId = 1
-    const userId = 1;
+    const userId = req.user.id;
     const todo = await this.todosService.create(createTodoDto, userId);
 
     const todoResponse: TodoResponse = {
@@ -113,9 +125,10 @@ export class TodosController {
   async update(
     @Param('id') id: string,
     @Body() updateTodoDto: UpdateTodoDto,
+    @Request() req: AuthenticatedRequest,
   ): Promise<ApiResponse<TodoResponse>> {
-    // TODO: Get userId from JWT token when authentication is implemented
-    const todo = await this.todosService.update(+id, updateTodoDto);
+    const userId = req.user.id;
+    const todo = await this.todosService.update(+id, updateTodoDto, userId);
 
     const todoResponse: TodoResponse = {
       id: todo.id,
@@ -135,9 +148,12 @@ export class TodosController {
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string): Promise<ApiResponse<null>> {
-    // TODO: Get userId from JWT token when authentication is implemented
-    await this.todosService.remove(+id);
+  async remove(
+    @Param('id') id: string,
+    @Request() req: AuthenticatedRequest,
+  ): Promise<ApiResponse<null>> {
+    const userId = req.user.id;
+    await this.todosService.remove(+id, userId);
 
     return successResponse('Todo deleted successfully', null);
   }

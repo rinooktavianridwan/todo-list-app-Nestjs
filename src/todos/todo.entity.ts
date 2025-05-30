@@ -1,4 +1,3 @@
-// todo.entity.ts
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -6,6 +5,7 @@ import {
   ManyToOne,
   CreateDateColumn,
   UpdateDateColumn,
+  JoinColumn,
 } from 'typeorm';
 import { User } from '../users/user.entity';
 
@@ -20,15 +20,16 @@ export class Todo {
   @Column({ nullable: true })
   description: string;
 
-  @Column({ default: false })
+  @Column({ name: 'is_done', default: false })
   isDone: boolean;
 
   @ManyToOne(() => User, (user) => user.todos, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'user_id' })
   user: User;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 }

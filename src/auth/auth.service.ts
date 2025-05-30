@@ -3,6 +3,7 @@ import {
   ConflictException,
   UnauthorizedException,
 } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -19,12 +20,15 @@ export interface AuthUserResponse {
 
 export interface LoginResponse {
   user: AuthUserResponse;
-  token: string;
+  access_token: string;
 }
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly jwtService: JwtService,
+  ) {}
 
   async register(dto: RegisterDto): Promise<ApiResponse<AuthUserResponse>> {
     // Check if user already exists
@@ -67,15 +71,22 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
+    // Generate JWT token
+    const payload = { sub: user.id, email: user.email };
+    const access_token = this.jwtService.sign(payload);
+
     // Remove password from response
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password, ...result } = user;
     const loginData: LoginResponse = {
       user: result as AuthUserResponse,
-      // TODO: Add JWT token here later
-      token: 'dummy.jwt.token',
+      access_token,
     };
 
     return successResponse('Login successful', loginData);
+  }
+
+  async validateUser(userId: number) {
+    return this.usersService.findOne(userId);
   }
 }
