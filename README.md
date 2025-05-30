@@ -23,12 +23,45 @@
 
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Aplikasi ini adalah RESTful API Todo List berbasis [NestJS](https://nestjs.com/) yang menyediakan fitur manajemen user dan todo. API ini mendukung operasi CRUD untuk user dan todo, autentikasi menggunakan JWT, serta penyimpanan data menggunakan database MySQL. Setiap endpoint yang sensitif dilindungi oleh mekanisme authentication token. Tersedia juga pengujian end-to-end (e2e) untuk memastikan keamanan dan fungsionalitas autentikasi serta fitur utama aplikasi.
+
+## Struktur & Pola Project
+
+Project ini menggunakan **pola modular**, yaitu struktur bawaan yang direkomendasikan oleh NestJS.
+
+### Alasan Menggunakan Pola Modular
+
+- **Pemecahan Tanggung Jawab (Separation of Concerns):** Setiap fitur (seperti autentikasi, user, todo) dipisahkan ke dalam modul masing-masing. Hal ini membuat kode lebih terorganisir, mudah dipahami, dan mudah dikelola.
+- **Skalabilitas:** Dengan modularisasi, aplikasi mudah dikembangkan. Penambahan fitur baru cukup dengan membuat modul baru tanpa mengganggu kode yang sudah ada.
+- **Reusabilitas:** Modul yang sudah dibuat dapat digunakan kembali di bagian lain aplikasi atau bahkan di project lain.
+- **Kemudahan Testing:** Batasan yang jelas antar modul membuat proses unit test dan e2e test menjadi lebih mudah dan terstruktur.
+- **Manajemen Dependensi:** Setiap modul mengelola dependensinya sendiri, sehingga mengurangi keterkaitan antar bagian dan membuat kode lebih robust.
+
+NestJS merekomendasikan pola ini karena sesuai dengan best practice dalam membangun aplikasi backend yang skalabel dan mudah dipelihara.
+
+## Dokumentasi Collection Postman
+
+Link : https://elements.getpostman.com/redirect?entityId=39478718-14d92089-11b8-46d2-9d52-0e4400e54e5d&entityType=collection
 
 ## Project setup
 
 ```bash
 $ npm install
+
+# Buat file .env dan isi konfigurasi database MySQL, contoh:
+DB_HOST=localhost
+DB_PORT=3306
+DB_USERNAME=root
+DB_PASSWORD=yourpassword
+DB_NAME=todo_db
+JWT_SECRET=your_jwt_secret
+```
+
+### Database & Migration
+Buat Database sesuai dengan .env
+```bash
+# Jalankan migration untuk membuat tabel di database
+$ npm run migration:run
 ```
 
 ## Compile and run the project
